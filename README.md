@@ -1,4 +1,4 @@
-discord: evil.ave
+discord: evxvee
 guild: discord.gg/arA7TyReHP
 youtube: @evilave
 
