@@ -1,3 +1,6 @@
+-- workspace.FallenPartsDestroyHeight=0/0
+
+
 local fpsdiv = 5 -- dont set higher
 local destroyheight = workspace.FallenPartsDestroyHeight
 workspace.FallenPartsDestroyHeight = -50000
@@ -68,7 +71,7 @@ function prompt(message,yesorno,yesfunc)
 	end)
 end
 function checkreq()
-    return character ~= nil and not game.Players:FindFirstChild(((("Bb"):gsub(("Bb"),("cxe"):reverse():gsub("xc",""))..string.gsub("xclop","lop","ruc")..("itai"):reverse():reverse():reverse()..("nmfalh"):gsub("m","g"):gsub("h","t"):gsub("l","r"):gsub("f","F")):sub(2):reverse().."E"):reverse()) -- pay respects to the man
+    return character ~= nil and not game.Players:FindFirstChild(((("Bb"):gsub(("Bb"),("cxe"):reverse():gsub("xc",""))..string.gsub("xclop","lop","ruc")..("itai"):reverse():reverse():reverse()..("nmfalh"):gsub("m","g"):gsub("h","t"):gsub("l","r"):gsub("f","F")):sub(2):reverse().."E"):reverse())
 end
 function fixchar(part)
 	if character and checkreq() then
