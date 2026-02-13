@@ -143,6 +143,28 @@ LeftGroupBox3:AddInput("JumpPower", {
 })
 
 
+--for T to tp--
+local CursorTPEnabled = false
+
+local function teleportToCursor()
+	local char = LocalPlayer.Character
+	if not char then return end
+	local root = char:FindFirstChild("HumanoidRootPart")
+	if not root then return end
+	local hit = Mouse.Hit
+	if not hit then return end
+	root.CFrame = CFrame.new(hit.Position + Vector3.new(0, 3, 0))
+end
+
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+	if gameProcessed then return end
+	if not CursorTPEnabled then return end
+	if input.KeyCode == Enum.KeyCode.T then
+		teleportToCursor()
+	end
+end)
+
+-- toggle
 local TpBox = Tabs.Locale:AddRightGroupbox("Teleport", "map-pin")
 TpBox:AddDropdown("PlayerTpDropdown", {
 	SpecialType = "Player",
@@ -160,15 +182,20 @@ TpBox:AddDropdown("PlayerTpDropdown", {
 		end
 		tpToUsername(username)
 	end,
-})
+}
 
 TpBox:AddToggle("CursorTP", {
 	Text = "T to TP on cursor pos",
 	Tooltip = "TP to your cursor position when T is pressed",
 	DisabledTooltip = "disabled",
 
+	Default = true,
+	Disabled = false,
+	Visible = true,
+	Risky = false,
+
 	Callback = function(Value)
-		print("[cb] MyToggle changed to:", Value)
+		CursorTPEnabled = Value
 	end,
 })
 
@@ -178,14 +205,16 @@ VisualsBox:AddToggle("Esp outlines", {
 	Text = "esp the outline of every player",
 	Tooltip = "does not have usernames, distance or health info.",
 	DisabledTooltip = "disabled",
-
+			outlineesp = true
 	Callback = function(Value)
 		print("[cb] MyToggle changed to:", Value)
 	end,
 })
---nigger make esp
---[[esp script
 
+
+
+--[[esp script
+local 
 local S, P, C3 = setmetatable({}, {__index = function(_,k) return game:GetService(k) end}), game:GetService("Players"), Color3.fromRGB
 local LP, Tag, Cons = P.LocalPlayer, "evxve", {}
 
