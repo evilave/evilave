@@ -1,0 +1,25 @@
+>---> 23 feb 2026
+[+] new verison: [v0.5.3]
+[+] added esp, tp, wp in local
+[+] made website page for key
+[+] improved exec tab
+
+>---> 23 jan 2026
+[+] new version: [v0.5.0]
+[+] used my first lib
+[+] added contents in tab with scripts
+
+>---> 3 oct 2025
+[+] new version [v0.4.0]
+[+] gui now is resizeable
+[+] added ui corners and min animation
+
+>---> 19 sep 2025
+[+] new version: [v0.3.0]
+[+] main tab: executor gui
+[+] scripts tab: buttons with popular scripts
+
+>---> 25 june 2025
+[+] new version: [v0.1.0]
+[+] buttons for scripts i used
+[?] was later remade to [v0.2.1]
