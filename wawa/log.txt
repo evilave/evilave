@@ -3,6 +3,7 @@
 [+] added esp, tp, wp in local
 [+] made website page for key
 [+] improved exec tab
+[!] obf cuz my 'friend' tried stealing the src
 
 >---> 23 jan 2026
 [+] new version: [v0.5.0]
